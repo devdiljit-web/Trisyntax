@@ -5,10 +5,9 @@ import { footerLinks, siteConfig } from "@/lib/site-config";
 import { NewsletterForm } from "@/components/layout/NewsletterForm";
 
 const socialLinks = [
-  { label: "LinkedIn", href: siteConfig.social.linkedin },
-  { label: "Twitter / X", href: siteConfig.social.twitter },
-  { label: "GitHub", href: siteConfig.social.github },
-  { label: "Dribbble", href: siteConfig.social.dribbble },
+ { label: "Instagram", href: siteConfig.social.instagram },
+ { label: "GitHub", href: siteConfig.social.github },
+  
 ];
 
 function FooterColumn({

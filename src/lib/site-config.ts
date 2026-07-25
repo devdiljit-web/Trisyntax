@@ -4,7 +4,7 @@ export const siteConfig = {
   tagline: "Engineering software that performs like it looks.",
   description:
     "TriSyntax is a web design and software engineering studio building high-performance websites, products, and platforms for ambitious brands — from Next.js frontends to scalable backend systems.",
-  url: "https://www.trisyntax.com",
+  url: "https://trisyntax.vercel.app",
   ogImage: "/og/trisyntax-og.jpg",
   email: "hello@trisyntax.com",
   phone: "+91 172 400 0000",
@@ -23,7 +23,7 @@ export const siteConfig = {
   social: {
     linkedin: "https://www.linkedin.com/company/trisyntax",
     twitter: "https://twitter.com/trisyntax",
-    github: "https://github.com/trisyntax",
+    github: "https://github.com/Jaiwant-thomas/",
     instagram: "https://www.instagram.com/trisyntax",
     dribbble: "https://dribbble.com/trisyntax",
   },

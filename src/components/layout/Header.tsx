@@ -28,10 +28,23 @@ export function Header() {
   useEffect(() => {
     if (!mobileOpen) return;
 
-    const { style } = document.documentElement;
-    const previousOverflow = style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
+    const scrollY = window.scrollY;
+    const { body } = document;
+    const previous = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+    };
+
+    // position:fixed (not just overflow:hidden) prevents iOS Safari from
+    // rubber-band scrolling the page behind the fixed drawer.
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
     pauseSmoothScroll();
 
     function onKeyDown(e: KeyboardEvent) {
@@ -40,8 +53,12 @@ export function Header() {
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
-      document.documentElement.style.overflow = previousOverflow;
-      document.body.style.overflow = "";
+      body.style.position = previous.position;
+      body.style.top = previous.top;
+      body.style.left = previous.left;
+      body.style.right = previous.right;
+      body.style.width = previous.width;
+      window.scrollTo(0, scrollY);
       resumeSmoothScroll();
       window.removeEventListener("keydown", onKeyDown);
     };
@@ -61,10 +78,12 @@ export function Header() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-500",
-        scrolled || openMenu || mobileOpen
-          ? "bg-white/80 shadow-[0_1px_0_0_rgba(0,0,0,0.06)] backdrop-blur-xl"
-          : "bg-transparent"
+        "fixed inset-x-0 top-0 z-50 pt-[env(safe-area-inset-top)] transition-all duration-500",
+        mobileOpen
+          ? "bg-white shadow-[0_1px_0_0_rgba(0,0,0,0.06)]"
+          : scrolled || openMenu
+            ? "bg-white/80 shadow-[0_1px_0_0_rgba(0,0,0,0.06)] backdrop-blur-xl"
+            : "bg-transparent"
       )}
       onMouseLeave={handleLeave}
     >
@@ -182,25 +201,25 @@ export function Header() {
             role="dialog"
             aria-modal="true"
             aria-label="Mobile navigation"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-10 flex h-dvh flex-col overflow-y-auto overscroll-contain bg-white lg:hidden"
+            initial={{ opacity: 0, scale: 1.02 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.02 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="isolate fixed inset-0 z-10 flex h-dvh flex-col overflow-y-auto overscroll-contain bg-white lg:hidden [-webkit-overflow-scrolling:touch] [touch-action:pan-y]"
           >
             <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden" aria-hidden>
               <div className="absolute -right-24 -top-24 size-72 rounded-full bg-brand-blue-100/70 blur-3xl" />
               <div className="absolute -left-24 bottom-0 size-72 rounded-full bg-brand-green-100/60 blur-3xl" />
             </div>
 
-            <Container className="flex flex-1 flex-col gap-1 pt-28 pb-6">
+            <Container className="flex flex-1 flex-col gap-1.5 pt-[calc(7rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
               {primaryNav.map((item, i) => (
                 <motion.div
                   key={item.label}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.05 + i * 0.05, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="border-b border-ink-100 py-4"
+                  className="border-b border-ink-100 py-5"
                 >
                   <Link
                     href={item.href}
@@ -210,7 +229,7 @@ export function Header() {
                     {item.label}
                   </Link>
                   {item.children && (
-                    <div className="mt-3 flex flex-col gap-1 border-l border-ink-200 pl-4">
+                    <div className="mt-4 flex flex-col gap-2 border-l border-ink-200 pl-4">
                       {item.children.map((child) => (
                         <Link
                           key={child.href}
@@ -225,7 +244,7 @@ export function Header() {
                   )}
                 </motion.div>
               ))}
-              <div className="mt-6 pb-6">
+              <div className="mt-8 pb-6">
                 <MagneticButton href="/contact" variant="gradient" size="lg" className="w-full">
                   Start a Project
                 </MagneticButton>
