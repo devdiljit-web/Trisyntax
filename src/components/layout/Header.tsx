@@ -14,6 +14,7 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMobileSubmenu, setOpenMobileSubmenu] = useState<string | null>(null);
   const closeTimeout = useRef<number | null>(null);
 
   useEffect(() => {
@@ -26,7 +27,10 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    if (!mobileOpen) return;
+    if (!mobileOpen) {
+      setOpenMobileSubmenu(null);
+      return;
+    }
 
     const scrollY = window.scrollY;
     const { body } = document;
@@ -213,37 +217,87 @@ export function Header() {
             </div>
 
             <Container className="flex flex-1 flex-col gap-1.5 pt-[calc(7rem+env(safe-area-inset-top))] pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
-              {primaryNav.map((item, i) => (
-                <motion.div
-                  key={item.label}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.05 + i * 0.05, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="border-b border-ink-100 py-5"
-                >
-                  <Link
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-xl font-display text-2xl font-medium text-ink-900 transition-colors active:text-brand-blue-700"
+              {primaryNav.map((item, i) => {
+                const isSubmenuOpen = openMobileSubmenu === item.label;
+                return (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.05 + i * 0.05, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    className="border-b border-ink-100 py-5"
                   >
-                    {item.label}
-                  </Link>
-                  {item.children && (
-                    <div className="mt-4 flex flex-col gap-2 border-l border-ink-200 pl-4">
-                      {item.children.map((child) => (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          onClick={() => setMobileOpen(false)}
-                          className="rounded-lg py-2 text-[0.9375rem] text-ink-500 transition-colors active:text-brand-blue-700"
+                    <div className="flex items-center justify-between gap-3">
+                      <Link
+                        href={item.href}
+                        onClick={() => setMobileOpen(false)}
+                        className="block flex-1 rounded-xl font-display text-2xl font-medium text-ink-900 transition-colors active:text-brand-blue-700"
+                      >
+                        {item.label}
+                      </Link>
+                      {item.children && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenMobileSubmenu((current) => (current === item.label ? null : item.label))
+                          }
+                          aria-expanded={isSubmenuOpen}
+                          aria-controls={`mobile-submenu-${item.label}`}
+                          aria-label={`${isSubmenuOpen ? "Collapse" : "Expand"} ${item.label} submenu`}
+                          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-500 transition-colors hover:bg-ink-100 hover:text-ink-900"
                         >
-                          {child.label}
-                        </Link>
-                      ))}
+                          <svg
+                            width="14"
+                            height="14"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                            className={cn(
+                              "transition-transform duration-300 ease-premium",
+                              isSubmenuOpen && "rotate-180"
+                            )}
+                            aria-hidden
+                          >
+                            <path
+                              d="M2 3.5L5 6.5L8 3.5"
+                              stroke="currentColor"
+                              strokeWidth="1.4"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      )}
                     </div>
-                  )}
-                </motion.div>
-              ))}
+                    {item.children && (
+                      <AnimatePresence initial={false}>
+                        {isSubmenuOpen && (
+                          <motion.div
+                            id={`mobile-submenu-${item.label}`}
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mt-4 flex flex-col gap-2 border-l border-ink-200 pl-4">
+                              {item.children.map((child) => (
+                                <Link
+                                  key={child.href}
+                                  href={child.href}
+                                  onClick={() => setMobileOpen(false)}
+                                  className="rounded-lg py-2 text-[0.9375rem] text-ink-500 transition-colors active:text-brand-blue-700"
+                                >
+                                  {child.label}
+                                </Link>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    )}
+                  </motion.div>
+                );
+              })}
               <div className="mt-8 pb-6">
                 <MagneticButton href="/contact" variant="gradient" size="lg" className="w-full">
                   Start a Project
